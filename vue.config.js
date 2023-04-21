@@ -17,6 +17,21 @@ const port = process.env.port || process.env.npm_config_port || 9528 // dev port
 
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
+
+  // dev: {
+  //   // Paths
+  //   assetsSubDirectory: 'static',
+  //   assetsPublicPath: '/',
+  //   proxyTable: { // 配置跨域
+  //   '/api':{
+  //       target:`http://192.168.33.110:3000`, //请求后台接口
+  //       changeOrigin:true, // 允许跨域
+  //       pathRewrite:{
+  //           '^/api' : '' // 重写请求
+  //       }
+  //   }
+  // },
+
   /**
    * You will need to set publicPath if you plan to deploy your site under a sub path,
    * for example GitHub Pages. If you plan to deploy your site to https://foo.github.io/bar/,

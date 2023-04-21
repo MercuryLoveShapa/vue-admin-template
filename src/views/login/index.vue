@@ -1,9 +1,12 @@
 <template>
   <div class="login-container">
+ 
+  <div >
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h1 class="titlea" >创新创业大赛</h1>
+        <h3 class="title">评委登录</h3>
       </div>
 
       <el-form-item prop="username">
@@ -13,7 +16,7 @@
         <el-input
           ref="username"
           v-model="loginForm.username"
-          placeholder="Username"
+          placeholder="请输入您的账号"
           name="username"
           type="text"
           tabindex="1"
@@ -30,7 +33,7 @@
           ref="password"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
+          placeholder="请输入您的密码"
           name="password"
           tabindex="2"
           auto-complete="on"
@@ -41,41 +44,42 @@
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
 
-      <div class="tips">
+      <!-- <div class="tips">
         <span style="margin-right:20px;">username: admin</span>
         <span> password: any</span>
-      </div>
+      </div> -->
 
     </el-form>
+</div>
   </div>
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
+
 
 export default {
   name: 'Login',
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+      if (value.length == 0) {
+        callback(new Error('请输入正确的账号'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+      if (value.length == 0 ) {
+        callback(new Error('请输入正确格式的密码'))
       } else {
         callback()
       }
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -83,17 +87,18 @@ export default {
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      
     }
   },
-  watch: {
-    $route: {
-      handler: function(route) {
-        this.redirect = route.query && route.query.redirect
-      },
-      immediate: true
-    }
-  },
+  // watch: {
+  //   $route: {
+  //     handler: function(route) {
+  //       this.redirect = route.query && route.query.redirect
+  //     },
+  //     immediate: true
+  //   }
+  // },
   methods: {
     showPwd() {
       if (this.passwordType === 'password') {
@@ -106,16 +111,48 @@ export default {
       })
     },
     handleLogin() {
+      // alert(this.username,this.password)
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
+        
+          this.axios
+          .post('http://192.168.33.110:3000/api/login',{
+                username:this.loginForm.username,
+                password:this.loginForm.password
           })
-        } else {
+
+          .then(res=>{
+            if (res.data.code == 0){
+              localStorage.setItem('token',res.data.data.token)
+              this.$message({
+                showClose: true,
+                message: res.data.msg,
+                type: 'success'
+              })
+              this.$router.push({ path: this.redirect || '/dashboard' })
+              // console.log(res)
+            }
+            else{
+              console.log(res.data.code)
+              this.$message({
+                
+                showClose: true,
+                message: res.data.msg,
+                type: 'error'
+              });
+            }
+          })
+          
+          // this.$store.dispatch('user/login', this.loginForm).then(() => {
+          // //   this.$router.push({ path: this.redirect || '/' })
+          
+          this.loading = false
+          // }).catch(() => {
+          //   this.loading = false
+          // })
+        } 
+        else {
           console.log('error submit!!')
           return false
         }
@@ -166,6 +203,7 @@ $cursor: #fff;
   .el-form-item {
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.1);
+    
     border-radius: 5px;
     color: #454545;
   }
@@ -173,23 +211,34 @@ $cursor: #fff;
 </style>
 
 <style lang="scss" scoped>
-$bg:#2d3a4b;
+// $bg:#2d3a4b;
+$bg:#CDDDFC;
 $dark_gray:#889aa4;
-$light_gray:#eee;
+$light_gray:#89AAEB;
 
 .login-container {
   min-height: 100%;
   width: 100%;
-  background-color: $bg;
+  height: 100%;
+  background: url('../../assets/background/login-bg.jpg');
+  background-size: 100% 100%;
+  // background-color: $bg;
+
   overflow: hidden;
 
   .login-form {
     position: relative;
     width: 520px;
     max-width: 100%;
-    padding: 160px 35px 0;
+    padding: 50px 35px 0;
     margin: 0 auto;
     overflow: hidden;
+    height: 450px;
+    top: 100px;
+    background-color: rgba($color: #000000, $alpha: 0.9);
+    
+  }
+
   }
 
   .tips {
@@ -218,7 +267,15 @@ $light_gray:#eee;
     .title {
       font-size: 26px;
       color: $light_gray;
-      margin: 0px auto 40px auto;
+      margin: 0px auto 20px auto;
+      text-align: center;
+      font-weight: bold;
+    }
+    
+    .titlea {
+      font-size: 35px;
+      color: $light_gray;
+      margin: 0px auto 60px auto;
       text-align: center;
       font-weight: bold;
     }
@@ -233,5 +290,6 @@ $light_gray:#eee;
     cursor: pointer;
     user-select: none;
   }
-}
+
+
 </style>
